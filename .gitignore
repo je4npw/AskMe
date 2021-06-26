@@ -1,0 +1,11 @@
+/node_modules/
+/.idea/.gitignore
+/.idea/AskMe.iml
+/.idea/discord.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
+/.idea/deployment.xml
+/.idea/sshConfigs.xml
+/.idea/webServers.xml
+/.env.local

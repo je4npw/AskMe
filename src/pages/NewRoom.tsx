@@ -8,7 +8,7 @@ import illustration from "../assets/images/illustration.svg";
 
 import logoImg from "../assets/images/logo.svg";
 
-import {Button} from "../components/Button";
+import {Button} from "../components/Button/Index";
 import '../styles/auth.scss'
 
 export function NewRoom(){
