@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 
 import { database } from '../services/firebase';
 import { useAuth } from "../hooks/useAuth";
-import { Button } from "../components/Button";
+import { Button } from "../components/Button/Index";
 
 import illustration from '../assets/images/illustration.svg'
 import logoImg from '../assets/images/logo.svg'
