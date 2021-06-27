@@ -1,10 +1,13 @@
-import {useHistory, useParams} from 'react-router-dom'
-import {useRoom} from "../hooks/useRoom"
-import {Button} from "../components/Button/Index"
+import { useState,  Fragment } from "react";
+import { useHistory, useParams } from 'react-router-dom'
+import Modal from 'react-modal'
 
-import {RoomCode} from "../components/RoomCode/Index"
-import {Question} from "../components/Question/Index"
-import {database} from "../services/firebase"
+import { useRoom } from "../hooks/useRoom"
+import { Button } from "../components/Button/Index"
+
+import { RoomCode } from "../components/RoomCode/Index"
+import { Question } from "../components/Question/Index"
+import { database } from "../services/firebase"
 
 import logoImg from '../assets/images/logo.svg'
 import deleteImg from '../assets/images/delete.svg'
@@ -20,6 +23,8 @@ type RoomParams ={
 export function AdminRoom() {
     const history = useHistory()
     const params = useParams<RoomParams>()
+    const [roomModalIsVisible, setRoomModalIsVisible] = useState(false)
+    const [modalQuestionIsVisible, setQuestionModalIsVisible] = useState(false)
     const roomId = params.id
     const { title, questions } = useRoom(roomId)
     async function handleEndRoom() {
@@ -29,9 +34,8 @@ export function AdminRoom() {
         history.push('/')
     }
     async function handleDeleteQuestion(questionId: string) {
-        if (window.confirm('Tem certeza que você deseja excluir essa pergunta?')) {
-            await database.ref(`rooms/${roomId}/questions/${questionId}`).remove()
-        }
+        await database.ref(`rooms/${roomId}/questions/${questionId}`).remove()
+        setQuestionModalIsVisible(false)
     }
     async function handleCheckQuestionAsAnswered(questionId: string) {
         await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
@@ -50,10 +54,31 @@ export function AdminRoom() {
                     <img src={logoImg} alt="LetMwAsk" />
                     <div>
                         <RoomCode code={roomId} />
-                        <Button
-                            isOutlined
-                            onClick={handleEndRoom}
-                        >Encerrar sala</Button>
+                        <>
+                            <Button
+                                isOutlined
+                                onClick={() => setRoomModalIsVisible(true)}
+                            >Encerrar sala</Button>
+                            <Modal
+                                className="room-modal"
+                                ariaHideApp={false}
+                                isOpen={roomModalIsVisible}
+                                onRequestClose={() => setRoomModalIsVisible(false)}
+                            ><h2>Quer mesmo encerrar a sala?</h2>
+                                <>
+                                    <Button
+                                        isOutlined
+                                        onClick={handleEndRoom}
+                                    >Encerrar
+                                    </Button>
+                                    <Button
+                                        isOutlined
+                                        onClick={() => setRoomModalIsVisible(false)}
+                                    >Cancelar
+                                    </Button>
+                                </>
+                            </Modal>
+                        </>
                     </div>
                 </div>
             </header>
@@ -67,40 +92,58 @@ export function AdminRoom() {
                 <div className="question-list">
                     {questions.map(question => {
                         return (
-                            <Question
-                                key={question.id}
-                                content={question.content}
-                                author={question.author}
-                                isAnswered={question.isAnswered}
-                                isHighlighted={question.isHighlighted}
-                            >
-                                {!question.isAnswered && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleCheckQuestionAsAnswered(question.id)}
-                                        >
-                                            <img src={checkImg} alt="Marcar pergunta como respondida"/>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleHighlightQuestion(question.id)}
-                                        >
-                                            <img src={answerImg} alt="Destacar pergunta"/>
-                                        </button>
-                                    </>
-                                )}
-                                <button
-                                    type="button"
-                                    onClick={() => handleDeleteQuestion(question.id)}
+                            <Fragment key={question.id}>
+                                <Question
+                                    content={question.content}
+                                    author={question.author}
+                                    isAnswered={question.isAnswered}
+                                    isHighlighted={question.isHighlighted}
                                 >
-                                    <img src={deleteImg} alt="Remover pergunta"/>
-                                </button>
-                            </Question>
+                                    {!question.isAnswered && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleCheckQuestionAsAnswered(question.id)}
+                                            >
+                                                <img src={checkImg} alt="Marcar pergunta como respondida"/>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleHighlightQuestion(question.id)}
+                                            >
+                                                <img src={answerImg} alt="Destacar pergunta"/>
+                                            </button>
+                                        </>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setQuestionModalIsVisible(true)}
+                                    >
+                                        <img src={deleteImg} alt="Remover pergunta"/>
+                                    </button>
+                                </Question>
+                                <Modal
+                                    isOpen={modalQuestionIsVisible}
+                                    onRequestClose={() => setQuestionModalIsVisible(false)}
+                                >
+                                    <>
+                                        <Button
+                                            isOutlined
+                                            onClick={() => handleDeleteQuestion(question.id)}
+                                        >Deletar
+                                        </Button>
+                                        <Button
+                                            isOutlined
+                                            onClick={() => setQuestionModalIsVisible(false)}
+                                        >Fechar
+                                        </Button>
+                                    </>
+                                </Modal>
+                            </Fragment>
                         )
                     })}
                 </div>
             </main>
         </div>
-    )
+)
 }
